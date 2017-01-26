@@ -4,6 +4,7 @@ __author__ = 'Vikram Manja'
 ##############################################################
 
 from BitVector import *
+import random
 # BitVector 3.4.6
 import sys
 
@@ -32,9 +33,11 @@ key_permutation_2 = [13,16,10,23,0,4,2,27,14,5,20,9,22,18,11,
 
 shifts_for_round_key_gen = [1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1]
 
-def get_encryption_key():
-    return BitVector(textstring = getLineFromFile(KEY_FILE)).permute(key_permutation_1)
-
+def get_encryption_key(key = None):
+    if not key:
+        return BitVector(textstring = getLineFromFile(KEY_FILE)).permute(key_permutation_1)
+    else:
+        return BitVector(textstring = key).permute(key_permutation_1)
 def generate_round_keys(encryption_key):
     """
     This is taken from the lecture notes compressed file by Avi Kak.
@@ -102,33 +105,39 @@ pbox_permutation = [15,  6, 19, 20,  28, 11, 27, 16,
                      1,  7, 23, 13,  31, 26,  2,  8,
                     18, 12, 29,  5,  21, 10,  3, 24]
 
-def substitute( expanded_half_block ):
+def substitute( expanded_half_block, random_sbox = None ):
     '''
     This method implements the step "Substitution with 8 S-boxes" step you see inside
     Feistel Function dotted box in Figure 4 of Lecture 3 notes.
 
-    This is taken from the lecture notes compressed file by Avi Kak.
+    This is mostly taken from the lecture notes compressed file by Avi Kak.
     '''
     output = BitVector (size = 32)
     segments = [expanded_half_block[x*6:x*6+6] for x in range(8)]
+    # Check Randomness
+    if random_sbox == None:
+        boxes = s_boxes
+    else:
+        boxes = random_sbox
     for sindex in range(len(segments)):
         row = 2*segments[sindex][0] + segments[sindex][-1]
         column = int(segments[sindex][1:-1])
-        output[sindex*4:sindex*4+4] = BitVector(intVal = s_boxes[sindex][row][column], size = 4)
+        output[sindex*4:sindex*4+4] = BitVector(intVal = boxes[sindex][row][column], size = 4)
     return output
 
-def cipher(decrypt = False):
+def cipher(decrypt = False, input_file = None, key = None, random_sbox = None):
 
     # Generate Round Key List
-    key = get_encryption_key()
+    key = get_encryption_key(key)
     round_keys = generate_round_keys(key)
-
     # Choose Encryption v. Decryption
     if not decrypt:
         bv = BitVector( filename=INPUT_FILE )
     else:
         bv = BitVector(filename=ENCRYPTED_FILE)
         round_keys.reverse()
+    if input_file:
+        bv = BitVector(filename=input_file)
 
     bv_en = BitVector(size=0)
 
@@ -145,7 +154,7 @@ def cipher(decrypt = False):
             # Round-key XOR
             out_xor = newRE ^ round_key
             # S-Box Substitution
-            sboxes_output = substitute(out_xor)
+            sboxes_output = substitute(out_xor, random_sbox=random_sbox)
             # P-Box Permutation
             RE_modified = sboxes_output.permute( pbox_permutation )
             # LE RE Swap and XOR

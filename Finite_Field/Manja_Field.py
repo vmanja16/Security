@@ -9,10 +9,12 @@ def prime(n):
     """
     n = int(n)
     if (n <= 1):return False
+    if (n==2):return True
     if (n % 2 == 0): return False
+    #Check odds for 3 +
     i = 3
-    n_sqrt = n** 0.5
-    while (i < n_sqrt):
+
+    while (i < n):
         if(n % i == 0):return False
         i +=2
     return True

@@ -1,8 +1,8 @@
 __author__ = 'Vikram Manja'
 
-
-modulus = input("Enter an integer n to check if Zn is a ring or field: ")
-
+while(True):
+    modulus = int(input("Enter an integer n > 1 to check if Zn is a ring or field: "))
+    if(modulus > 1):break
 def prime(n):
     """
     RETURNS True IF input is PRIME

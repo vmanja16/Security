@@ -25,3 +25,5 @@ with open("output.txt", "w") as f:
     else:
         f.write("ring")
 
+# Input: 7
+# Output: field

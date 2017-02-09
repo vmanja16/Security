@@ -60,6 +60,9 @@ def g(keyword, round_constant, byte_sub_table):
     return newword, round_constant
 
 def gen_key_schedule_128(key_bv):
+    '''
+    Mostly taken from lectures notes by Avi Kak
+    '''
     byte_sub_table = subBytesTable
 
     key_words = [None for i in range(44)]

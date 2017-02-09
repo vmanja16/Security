@@ -1,5 +1,8 @@
 __author__ = 'Vikram'
 
+########################################################
+# Advanced Encryption Standard (128 bit) by Vikram Manja
+########################################################
 from BitVector import *
 
 INPUT_FILE = "plaintext.txt"
@@ -107,14 +110,12 @@ def encrypt():
     bv = BitVector( filename=INPUT_FILE )
 
     bv_out = BitVector(size=0)
-    bv_in = BitVector(size=0)
 
     while (bv.more_to_read):
         bitvec = bv.read_bits_from_file( 128 )
         # PAD if Necessary
         if len(bitvec) < 128:
             bitvec += BitVector(size = (128 - len(bitvec)))
-        bv_in += bitvec.deep_copy()
         # Initialize stateArray and Round_Key
         state = createStateArray(bitvec)
         # XOR state with round_key 0
@@ -159,8 +160,6 @@ def decrypt():
     f = open(ENCRYPTION_FILE, "r")
     bv = BitVector(hexstring=f.read().strip())
     f.close()
-
-    print(bv.get_bitvector_in_hex())
 
     round_keys = get_round_keys()
     round_keys.reverse()
@@ -215,14 +214,13 @@ def decrypt():
     return bv_out
 
 if __name__ == '__main__':
-    # encrypt!
+    # encrypt
     e = encrypt()
-    print(e.get_bitvector_in_hex())
+    # Write encrypted text as HEX string
     with open("encrypted.txt","w") as en:
         en.write(e.get_bitvector_in_hex())
     # decrypt!
     d = decrypt()
-    print(d.get_bitvector_in_hex())
-    with open("decrypted.txt", "w") as dec:
-        dec.write(d.get_bitvector_in_hex())
-    print(d.get_bitvector_in_ascii())
+    # Write decrypted bytes to text
+    with open("decrypted.txt", "wb") as dec:
+        d.write_to_file(dec)

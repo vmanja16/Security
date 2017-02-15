@@ -13,7 +13,6 @@ class RC4:
     def __init__(self, key):
         self.key = key
         self.keylen = len(key)
-        self.ksa()
     def ksa(self):
         """
         Key Scheduling Algorithm
@@ -24,9 +23,19 @@ class RC4:
         for i in range(256):
             j = (j + self.state_vector[i] + T_vector[i]) % 256
             self.swap(i,j)
-    def encrypt(self, originalImage):
-        out = open(ENCRYPTED_FILE, "wb")
-        bv = BitVector(filename=originalImage)
+    def encrypt(self, originalImage, encrypt=True):
+        # Run the Key scheduler
+        self.ksa()
+        # Have to deal with unknown file object/mode
+        name = originalImage.name
+        originalImage.close()
+        # Choose Encryption Decryption
+        if (encrypt):
+            out = open("encrypted.ppm", "wb")
+        else:
+            out = open("decrypted.ppm", "wb")
+        bv = BitVector(filename=name)
+        # Standard RC4 byte-by-byte encryption
         i,j = 0,0
         while(bv.more_to_read):
             bitvector = bv.read_bits_from_file(8)
@@ -37,19 +46,23 @@ class RC4:
             bv_out=BitVector(intVal=self.state_vector[k])
             bv_out ^= bitvector
             bv_out.write_to_file(out)
-        out.close()
+        return out
     def decrypt(self, encryptedImage):
-        pass
+        return self.encrypt(encryptedImage, encrypt=False)
     def swap(self, i, j):
         temp = self.state_vector[i]
         self.state_vector[i] = self.state_vector[j]
         self.state_vector[j] = temp
 
-
-#f = open("boxes_2.ppm", "rb")
-#r = RC4("abcdefghijlmnopq")
-#r.encrypt(INPUT_FILE)
-
-#j = BitVector(fp = f)
-#j.read_bits_from_fileobject(f)
-#print(j.get_bitvector_in_hex())
+if __name__ == "__main__":
+    rc4Cipher = RC4("abcdefghijklmnop")
+    originalImage = open("winterTown.ppm", "r")
+    encryptedImage = rc4Cipher.encrypt(originalImage)
+    print("image has been encrypted as 'encrypted.ppm'")
+    decryptedImage = rc4Cipher.decrypt(encryptedImage)
+    decryptedImage.close()
+    print("image has been decrypted as 'decrypted.ppm'")
+    import filecmp
+    # Check if Equal
+    print(filecmp.cmp("winterTown.ppm", "decrypted.ppm"))
+    # Rc4 is easy to do if given files, harder w/ file objects...

@@ -1,9 +1,10 @@
+#####################################
+# 256 Bit RSA Cipher by Vikram Manja
+#####################################
+
 from BitVector import *
 from PrimeGenerator import PrimeGenerator as PG
 import sys
-############
-# 256 Bit RSA Cipher
-############
 
 e = 65537
 
@@ -76,11 +77,8 @@ def decrypt(encrypted_file, decrypted_file):
     dec = open(decrypted_file, "w")
     # GET p and q
     p,q = (int(i) for i in open("pq.txt", "r").read().split())
-    n = p * q
     totient = (p-1) * (q-1)
     d = BitVector(intVal=e).multiplicative_inverse(BitVector(intVal=totient))
-    print(int(d))
-    bv_hex = BitVector(size=0)
     bv = BitVector(filename=encrypted_file)
     while bv.more_to_read:
         # Read & Translate Bitvector from hexstring
@@ -92,8 +90,8 @@ def decrypt(encrypted_file, decrypted_file):
         bv_out = bv_out[128:]
         # Write Plain Text
         dec.write(bv_out.get_bitvector_in_ascii())
-        bv_hex+=bv_out
-    print(bv_hex.get_bitvector_in_hex())
+    dec.close()
+
 if __name__ == "__main__":
     if(len(sys.argv) < 4):
         print("Error: requires 3 inputs")

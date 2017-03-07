@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 __author__ = 'Vikram Manja'
-
+#################################
+# SHA-512 by Vikram Manja
+#################################
 import sys
 from BitVector import *
 k_vals="\
@@ -27,6 +29,7 @@ ca273eceea26619c d186b8c721c0c207 eada7dd6cde0eb1e f57d4f7fee6ed178 \
 
 k = [BitVector(hexstring=i) for i in k_vals.split()]
 
+
 MODULUS = 0xFFFFFFFFFFFFFFFF
 
 def sigmaE(e):
@@ -35,7 +38,7 @@ def sigmaE(e):
     e3 = e.deep_copy() >> 41
     return (int(e1^e2^e3))
 
-def sigmaa(a):
+def sigmaA(a):
     a1 = a.deep_copy() >> 28
     a2 = a.deep_copy() >> 34
     a3 = a.deep_copy() >> 39
@@ -55,7 +58,7 @@ def delta1(x):
 
 def sha512(string_to_be_hashed):
 
-    bv = BitVector(textstring=message)
+    bv = BitVector(textstring=string_to_be_hashed)
     # Get Length
     length = bv.length()
     bv_length = BitVector(intVal=length, size=128)
@@ -91,8 +94,8 @@ def sha512(string_to_be_hashed):
         a,b,c,d,e,f,g,h = h0,h1,h2,h3,h4,h5,h6,h7
         for i in range(80):
 
-            T1 = (int(h) + int((e&f) ^ (~e & g)) + sigmaE(e) + int(words[i]) + int(k[i]) ) & MODULUS
-            T2 = (sigmaa(a) + int((a&b)^(a&c)^(b&c))) & MODULUS
+            T1 = (int(h) + int((e&f) ^ ((~e) & g)) + sigmaE(e) + int(words[i]) + int(k[i]) ) & MODULUS
+            T2 = (sigmaA(a) + int((a&b)^(a&c)^(b&c))) & MODULUS
             h = g
             g = f
             f = e
@@ -113,17 +116,16 @@ def sha512(string_to_be_hashed):
 
     message_hash = h0 + h1 + h2 + h3 + h4 + h5 + h6 + h7
 
-    print(message_hash.get_bitvector_in_hex())
+    return message_hash
 
 if __name__ == "__main__":
 
-
     message = sys.argv[1]
     msg = open(message, "r").read()
-    sha512(msg)
-    import hashlib
-    f = open(message, "rb")
-    x = hashlib.sha512()
-    r = f.read()
-    x.update(r)
-    print(x.hexdigest())
+    Hash = sha512(msg)
+    with open("output.txt", "w") as f:
+        f.write(Hash.get_bitvector_in_hex())
+
+# EXAMPLE:
+# input:  bb
+# output: 24b1a812d4e3535c06011c430aaba3f59d32f36263ddcb99541f998266c5e84a52fb33f951cec78656f598a004f83c771388b9a80404f7432b714f4dcae4a00f

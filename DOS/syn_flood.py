@@ -47,5 +47,5 @@ class TcpAttack():
 
 if __name__ == "__main__":
     pass
-    #Tcp = TcpAttack("spoo", "shay.ecn.purdue.edu")
+    #Tcp = TcpAttack("123.123.123.123", "shay.ecn.purdue.edu")
     #Tcp.scanTarget(0,30)
